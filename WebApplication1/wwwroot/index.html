@@ -14,12 +14,15 @@
 <body class="h-100">
     <h2 class="w-50 m-auto p-3">Mario Kart</h2>
     <h3 class="w-50 p-2 m-auto" id="count">COUNT = ?</h3>
-    <div class="w-75 m-auto p-3">
+    <div class="w-50 p-2 m-auto" id="maxValues">
+    </div>
+    <div class="w-50 m-auto p-3">
 
         <div class="btn-group btn-group-sm" role="group">
             <div type="button" class="btn btn-primary">Get Count</div>
-            <div type="button" class="btn" ">Get Best</div>
+            <div type="button" class="btn">Get Best</div>
         </div>
+
         <div class="p-2">
 
             <label for="formControlRangeSpeed">speed</label>
@@ -105,7 +108,46 @@
             toggleButtonCount = !toggleButtonCount;
             getValues();
         });
+        // get and generate maxvalues for given filtered results
+        function getMaxValues() {
+            var speed = document.getElementById('formControlRangeSpeed').value
+            var accel = document.getElementById('formControlRangeAccell').value
+            var weight = document.getElementById('formControlRangeWeight').value
+            var handling = document.getElementById('formControlRangeHandling').value
+            var traction = document.getElementById('formControlRangeTraction').value
+            var best = document.getElementById('formControlRangeBest').value
+            var urlParams = "speed=" + speed + "&accel=" + accel + "&weight=" + weight + "&handling=" + handling + "&traction" + traction + "&best" + best + "&count=" + toggleButtonCount.toString()
+            var url = 'https://localhost:44372/api/values/getmax/' + urlParams
 
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.onload = function () {
+                $(maxValues).empty();
+
+                var d = this.getResponseHeader("count")
+                console.log(d )
+
+                console.log(document.getElementById("count").innerHTML> 0)
+                    const obj = JSON.parse(this.response)
+                    const maxsp = parseFloat(this.getResponseHeader("maxspeed")).toFixed(2)
+                    const maxaccel = parseFloat(this.getResponseHeader("maxaccel")).toFixed(2)
+                    const maxweight = parseFloat(this.getResponseHeader("maxspeed")).toFixed(2)
+                    const maxhandle = parseFloat(this.getResponseHeader("maxhandling")).toFixed(2)
+                    const maxtraction = parseFloat(this.getResponseHeader("maxtraction")).toFixed(2)
+                    const maxbest = parseFloat(this.getResponseHeader("maxbest")).toFixed(2)
+                    var allMaxValueDivs = $(`<div>
+                    <h3>Max Speed: ${maxsp}</h3>
+                    <h3>Max Acceleration: ${maxaccel}</h3>
+                    <h3>Max Weight: ${maxweight}</h3>
+                    <h3>Max Handling: ${maxhandle}</h3>
+                    <h3>Max Traction: ${maxtraction}</h3>
+                    <h3>Max Best: ${maxbest}</h3>
+                <div>`)
+                    $(maxValues).append(allMaxValueDivs);
+                }
+            xhr.send();
+
+        }
         //get values from range sliders, send as url parameters to server
         function getValues() {
             var speed = document.getElementById('formControlRangeSpeed').value
@@ -115,10 +157,10 @@
             var traction = document.getElementById('formControlRangeTraction').value
             var best = document.getElementById('formControlRangeBest').value
 
-           // console.log(speed + ", " + accel + ", " + weight + ", " + handling + ", " + traction)
-           // console.log(toggleButtonCount)
+            // console.log(speed + ", " + accel + ", " + weight + ", " + handling + ", " + traction)
+            // console.log(toggleButtonCount)
 
-            var urlParams = "speed=" + speed + "&accel=" + accel + "&weight=" + weight + "&handling=" + handling + "&traction" + traction + "&best" + best+ "&count=" + toggleButtonCount.toString()
+            var urlParams = "speed=" + speed + "&accel=" + accel + "&weight=" + weight + "&handling=" + handling + "&traction" + traction + "&best" + best + "&count=" + toggleButtonCount.toString()
             var url = 'https://localhost:44372/api/values/' + urlParams
 
             var xhr = new XMLHttpRequest();
@@ -126,7 +168,7 @@
             xhr.onload = function () {
                 // from server we set custom header for count
                 document.getElementById("count").innerHTML = "COUNT = " + this.getResponseHeader("count")
-                const obj = JSON.parse( this.response)
+                const obj = JSON.parse(this.response)
                 //console.log(obj)
                 const imagesload = document.getElementById("imagesload")
                 $(imagesload).empty();
@@ -134,37 +176,39 @@
                 //when toglebuttoncount is false then we output the images and stats
                 if (toggleButtonCount == false) {
 
-                for (const elem of obj) {
-                    var parentDivName = "imagesChildDiv" + count.toString()
-                    var allDivs = $(`<div class="d-flex flex-column px-5 py-3">
-                        <div id="${parentDivName}" class ="d-flex flex-row flex-nowrap" >
-                            <img class="" src="/images/${elem.charac}.png">
-                            <img class="img-fluid" src="/images/${elem.kart}.png">
-                            <img class="img-fluid" src="/images/${elem.glid}.png">
-                            <img class="img-fluid" src="/images/${elem.wheel}.png">
-                        </div>
-                        <div>
-                            <p class="">${elem.charac}</p>
-                            <p class="">${elem.kart}</p>
-                            <p class="">${elem.glid}</p>
-                            <p class="">${elem.wheel}</p>
-                            <p class="">${parseFloat(elem.speed).toFixed(2) }</p>
-                            <p class="">${parseFloat(elem.accel).toFixed(2)}</p>
-                            <p class="">${parseFloat(elem.weight).toFixed(2)}</p>
-                            <p class="">${parseFloat(elem.handling).toFixed(2)}</p>
-                            <p class="">${parseFloat(elem.traction).toFixed(2)}</p>
-                            <p class="">${parseFloat(elem.best).toFixed(2)}</p>
+                    for (const elem of obj) {
+                        var parentDivName = "imagesChildDiv" + count.toString()
+                        var allDivs = $(`<div class="d-flex flex-column px-5 py-3">
+                                <div id="${parentDivName}" class ="d-flex flex-row flex-nowrap" >
+                                    <img class="" src="/images/${elem.charac}.png">
+                                    <img class="img-fluid" src="/images/${elem.kart}.png">
+                                    <img class="img-fluid" src="/images/${elem.glid}.png">
+                                    <img class="img-fluid" src="/images/${elem.wheel}.png">
+                                </div>
+                                <div>
+                                    <p class="">${elem.charac}</p>
+                                    <p class="">${elem.kart}</p>
+                                    <p class="">${elem.glid}</p>
+                                    <p class="">${elem.wheel}</p>
+                                    <p class="">${parseFloat(elem.speed).toFixed(2)}</p>
+                                    <p class="">${parseFloat(elem.accel).toFixed(2)}</p>
+                                    <p class="">${parseFloat(elem.weight).toFixed(2)}</p>
+                                    <p class="">${parseFloat(elem.handling).toFixed(2)}</p>
+                                    <p class="">${parseFloat(elem.traction).toFixed(2)}</p>
+                                    <p class="">${parseFloat(elem.best).toFixed(2)}</p>
 
-                        </div>
-                    </div>`)
-                    $(imagesload).append(allDivs);
+                                </div>
+                            </div>`)
+                        $(imagesload).append(allDivs);
 
 
-                    count++
-                }
+                        count++
+                    }
                 }
             };
             xhr.send();
+            getMaxValues()
+
         }
     </script>
 </body>
